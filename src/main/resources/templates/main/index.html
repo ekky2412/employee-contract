@@ -27,8 +27,10 @@
 								<input class="form-control" type="file" id="fileUpload" name="file" accept=".xls,.xlsx" required />
 								<button class="btn btn-success" type="submit">Upload</button>
 							</div>
-							<div class="row" th:if="${message}">
-								<p class="form-text text-danger" th:text="${message}"></p>
+							<div class="alert alert-dismissible fade show" th:if="${successUpsert != null}" th:classappend="${successUpsert ? 'alert-success' : 'alert-danger'}">
+								<i th:classappend="${successUpsert ? 'bx bx-check-circle' : 'bx bx-error-circle'}"></i>
+								<span th:text="${message}"></span>
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 							</div>
 						</form>
 

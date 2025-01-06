@@ -36,20 +36,27 @@ public class MainController {
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, EmployeeFilterDTO dto, Model model) {
         model.addAttribute("page", "main");
-        model.addAttribute("employees", employeeService.get(dto));
         if (file.isEmpty()) {
             model.addAttribute("message", "Please select a file to upload.");
+            model.addAttribute("messageStatus", false);
             return "main/index";
         }
 
         String fileName = file.getOriginalFilename();
         if (fileName != null && (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))) {
             // Lakukan logika penyimpanan file atau parsing Excel di sini
-            model.addAttribute("message", "File uploaded successfully: " + fileName);
+//            model.addAttribute("message", "File uploaded successfully: " + fileName);
+            Boolean result = employeeService.insertExcelFile(file);
+            String message = result ? "Data berhasil ditambahkan!" : "Terjadi kesalahan saat menyimpan data";
+            model.addAttribute("message", message);
+            model.addAttribute("successUpsert", result);
+
         } else {
             model.addAttribute("message", "Invalid file format. Please upload an Excel file.");
+            model.addAttribute("successUpsert", false);
         }
 
+        model.addAttribute("employees", employeeService.get(dto));
         return "main/index";
     }
 }

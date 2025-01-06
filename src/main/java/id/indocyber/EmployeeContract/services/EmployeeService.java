@@ -12,10 +12,17 @@ import id.indocyber.EmployeeContract.models.Employee;
 import id.indocyber.EmployeeContract.models.Position;
 import id.indocyber.EmployeeContract.repositories.BranchRepository;
 import id.indocyber.EmployeeContract.repositories.EmployeeRepository;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -103,6 +110,47 @@ public class EmployeeService {
             employeeRepository.deleteById(dto.getEmployeeCode());
             return true;
         }catch (Exception e){
+            System.err.println("Error : " + e.getMessage());
+            return false;
+        }
+    }
+
+    public Boolean insertExcelFile(MultipartFile file){
+        List<Employee> employees = new ArrayList<>();
+        try(InputStream inputStream = file.getInputStream()){
+            Workbook workbook = new XSSFWorkbook(inputStream);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            for(Row row : sheet){
+                //Skip header
+                if(row.getRowNum() == 0){
+                    continue;
+                }
+
+                var branch = Branch.builder()
+                        .code(row.getCell(2).getStringCellValue())
+                        .build();
+                var position = Position.builder()
+                        .code(row.getCell(3).getStringCellValue())
+                        .build();
+
+                Employee employee = Employee.builder()
+                        .code(row.getCell(0).getStringCellValue())
+                        .name(row.getCell(1).getStringCellValue())
+                        .branch(branch)
+                        .position(position)
+                        .contractStartDate(row.getCell(4).getLocalDateTimeCellValue().toLocalDate())
+                        .contractEndDate(row.getCell(5).getLocalDateTimeCellValue().toLocalDate())
+                        .build();
+
+                employees.add(employee);
+                System.out.println("Data : " + employee);
+            }
+
+            employeeRepository.saveAll(employees);
+
+            return true;
+        } catch (Exception e){
             System.err.println("Error : " + e.getMessage());
             return false;
         }

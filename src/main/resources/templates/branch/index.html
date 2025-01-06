@@ -22,7 +22,7 @@
 					<div>
 						<h2>Branch Data</h2>
 						<a th:href="@{/branch/insert}" class="btn btn-success">Add Data</a>
-						<div class="alert alert-dismissible fade show" th:if="${successUpsert}" th:classappend="${successUpsert ? 'alert-success' : 'alert-danger'}">
+						<div class="alert alert-dismissible fade show" th:if="${successUpsert != null}" th:classappend="${successUpsert ? 'alert-success' : 'alert-danger'}">
 							<i th:classappend="${successUpsert ? 'bx bx-check-circle' : 'bx bx-error-circle'}"></i>
 							<span th:text="${message}"></span>
 							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
