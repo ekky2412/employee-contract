@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout/base ::head}">
+	<title>Halaman Utama</title>
+</head>
+<body>
+<div class="layout-wrapper layout-content-navbar">
+	<div class="layout-container">
+		<!-- Menu -->
+
+		<aside th:replace="~{layout/sidebar :: sidebar}"></aside>
+		<!-- / Menu -->
+
+		<!-- Layout container -->
+		<div class="layout-page">
+			<!-- Content wrapper -->
+			<div class="content-wrapper">
+				<!-- Content -->
+
+				<div class="container-xxl flex-grow-1 container-p-y">
+					<!-- CONTENT-->
+					<div>
+						<h2>Employee Data</h2>
+						<a th:href="@{/employee/insert}" class="btn btn-success">Add Data</a>
+						<div class="alert alert-dismissible fade show" th:if="${successUpsert}" th:classappend="${successUpsert ? 'alert-success' : 'alert-danger'}">
+							<i th:classappend="${successUpsert ? 'bx bx-check-circle' : 'bx bx-error-circle'}"></i>
+							<span th:text="${message}"></span>
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+						<table class="table table-striped">
+							<thead>
+								<th>Code</th>
+								<th>Name</th>
+								<th>Branch Name</th>
+								<th>Position Name</th>
+								<th>Contract Start Date</th>
+								<th>Contract End Date</th>
+								<th>Action</th>
+							</thead>
+							<tbody>
+								<tr th:each="employee : ${employees}" th:object="${employee}">
+									<td th:text="*{employeeCode}"></td>
+									<td th:text="*{employeeName}"></td>
+									<td th:text="*{branchName}"></td>
+									<td th:text="*{positionName}"></td>
+									<td th:text="*{contractStartDateFormatted}"></td>
+									<td th:text="*{contractEndDateFormatted}"></td>
+									<td>
+										<a th:href="@{/employee/edit?code={code}(code=*{employeeCode})}" class="btn btn-warning">Edit</a>
+										<a th:href="@{/employee/delete?code={code}(code=*{employeeCode})}" class="btn btn-danger">Delete</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- / Content -->
+
+				<div class="content-backdrop fade"></div>
+			</div>
+			<!-- Content wrapper -->
+		</div>
+		<!-- / Layout page -->
+	</div>
+
+	<!-- Overlay -->
+	<div class="layout-overlay layout-menu-toggle"></div>
+</div>
+<div th:replace="~{layout/base::js-import}"></div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<aside th:fragment="sidebar" id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+	<div class="app-brand demo">
+		<a href="" class="app-brand-link">
+			<span class="app-brand-text menu-text fw-bolder ms-2">ECW</span>
+		</a>
+
+		<a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+			<i class="bx bx-chevron-left bx-sm align-middle"></i>
+		</a>
+	</div>
+
+	<div class="menu-inner-shadow"></div>
+
+	<ul class="menu-inner py-1">
+		<!-- Dashboard -->
+		<li class="menu-item" th:classappend="${page == 'main' ? 'active' : ''}">
+			<a th:href="@{/}" class="menu-link">
+				<i class="menu-icon tf-icons bx bx-home-circle"></i>
+				<div>Dashboard</div>
+			</a>
+		</li>
+		<li class="menu-item" th:classappend="${page == 'employee' ? 'active' : ''}">
+			<a th:href="@{/employee}" class="menu-link">
+				<i class="menu-icon tf-icons bx bx-home-circle"></i>
+				<div>Employee</div>
+			</a>
+		</li>
+		<li class="menu-item" th:classappend="${page == 'branch' ? 'active' : ''}">
+			<a th:href="@{/branch}" class="menu-link">
+				<i class="menu-icon tf-icons bx bx-home-circle"></i>
+				<div>Branch</div>
+			</a>
+		</li>
+		<li class="menu-item" th:classappend="${page == 'position' ? 'active' : ''}">
+			<a th:href="@{/position}" class="menu-link">
+				<i class="menu-icon tf-icons bx bx-home-circle"></i>
+				<div>Position</div>
+			</a>
+		</li>
+	</ul>
+</aside>
