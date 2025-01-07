@@ -24,6 +24,7 @@
 						<div class="card-body">
 							<form class="form" th:action="@{/branch/upsert}" th:object="${branch}" method="post">
 								<div class="input-group">
+									<input type="hidden" th:if="${formEdit != null}" name="isEdit" th:value="${formEdit}">
 									<input type="hidden" th:if="*{code != null and code != ''}" th:field="*{code}" />
 
 									<!-- Jika tambah data, tampilkan sebagai input text -->
@@ -31,13 +32,23 @@
 										<label class="input-group-text" for="code">Branch Code:</label>
 										<input class="form-control" type="text" id="code" th:field="*{code}" required />
 									</div>
-									<div th:errors="*{code}" class="text-danger"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'code'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
 									<label class="input-group-text" for="name">Branch Name:</label>
 									<input class="form-control" type="text" id="name" th:field="*{name}" required />
-									<div th:errors="*{name}" class="text-danger"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'name'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">

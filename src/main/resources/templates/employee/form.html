@@ -24,6 +24,7 @@
 						<div class="card-body">
 							<form class="form" method="post" th:action="@{/employee/upsert}" th:object="${employee}">
 								<div class="input-group">
+									<input type="hidden" th:if="${formEdit != null}" name="isEdit" th:value="${formEdit}">
 									<input th:field="*{employeeCode}"
 										   th:if="*{employeeCode != null and employeeCode != ''}"
 										   type="hidden"/>
@@ -34,14 +35,24 @@
 										<input class="form-control" id="employeeCode" required
 											   th:field="*{employeeCode}" type="text"/>
 									</div>
-									<div class="text-danger" th:errors="*{employeeCode}"></div>
+									<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+										<div th:each="error : ${bindingResult.allErrors}">
+											<div class="text-danger" th:if="${error.field == 'employeeCode'}"
+												 th:text="${error.defaultMessage}"></div>
+										</div>
+									</div>
 								</div>
 
 								<div class="input-group">
 									<label class="input-group-text" for="employeeName">Employee Name:</label>
-									<input class="form-control" id="employeeName" required th:field="*{employeeName}"
+									<input class="form-control" id="employeeName" th:field="*{employeeName}"
 										   type="text"/>
-									<div class="text-danger" th:errors="*{employeeName}"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'employeeName'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
@@ -54,7 +65,12 @@
 												th:value="${branch.code}">
 										</option>
 									</select>
-									<div class="text-danger" th:errors="*{branchCode}"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'branchCode'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
@@ -67,14 +83,25 @@
 												th:value="${position.code}">
 										</option>
 									</select>
-									<div class="text-danger" th:errors="*{positionCode}"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'positionCode'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
 									<label class="input-group-text" for="contractStartDate">Contract Start Date:</label>
 									<input class="form-control" date id="contractStartDate"
-										   required th:name="contractStartDate" th:value="*{contractStartDate}" type="date"/>
-									<div class="text-danger" th:errors="*{contractStartDate}"></div>
+										   required th:name="contractStartDate" th:value="*{contractStartDate}"
+										   type="date"/>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'contractStartDate'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
@@ -83,7 +110,12 @@
 										   th:value="*{contractEndDate}"
 										   type="date"
 									/>
-									<div class="text-danger" th:errors="*{contractEndDate}"></div>
+								</div>
+								<div th:if="${bindingResult != null and not #lists.isEmpty(bindingResult.allErrors)}">
+									<div th:each="error : ${bindingResult.allErrors}">
+										<div class="text-danger" th:if="${error.field == 'contractEndDate'}"
+											 th:text="${error.defaultMessage}"></div>
+									</div>
 								</div>
 
 								<div class="input-group">
