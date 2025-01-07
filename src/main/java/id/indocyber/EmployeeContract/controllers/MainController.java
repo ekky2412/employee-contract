@@ -2,6 +2,8 @@ package id.indocyber.EmployeeContract.controllers;
 
 import id.indocyber.EmployeeContract.dtos.employees.EmployeeFilterDTO;
 import id.indocyber.EmployeeContract.services.EmployeeService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/")
@@ -32,7 +36,6 @@ public class MainController {
 //        return "redirect:/main";
 //    }
 
-    // todo : tambahkan fitur upsert dari excel
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("file") MultipartFile file, EmployeeFilterDTO dto, Model model) {
         model.addAttribute("page", "main");
@@ -58,5 +61,13 @@ public class MainController {
 
         model.addAttribute("employees", employeeService.get(dto));
         return "main/index";
+    }
+
+    @GetMapping("/download")
+    public void downloadExcel(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=employees.xlsx");
+        byte[] excelData = employeeService.createExcelTemplate();
+        response.getOutputStream().write(excelData);
     }
 }

@@ -10,6 +10,8 @@ import id.indocyber.EmployeeContract.repositories.PositionRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
 public class PositionService {
     private PositionRepository positionRepository;
@@ -36,6 +38,10 @@ public class PositionService {
                     .build();
 
         return PositionFieldDTO.builder().build();
+    }
+
+    public Optional<Position> getByName(String name){
+        return positionRepository.findByName(name);
     }
 
     public Boolean upsert(PositionFormDTO dto){

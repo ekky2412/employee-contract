@@ -7,6 +7,7 @@ import id.indocyber.EmployeeContract.repositories.BranchRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BranchService {
@@ -34,6 +35,10 @@ public class BranchService {
                     .build();
 
         return BranchFieldDTO.builder().build();
+    }
+
+    public Optional<Branch> getByName(String name){
+        return branchRepository.findByName(name);
     }
 
     public Boolean upsert(BranchFormDTO dto){

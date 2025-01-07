@@ -6,20 +6,19 @@ import id.indocyber.EmployeeContract.dtos.employees.EmployeeFieldDTO;
 import id.indocyber.EmployeeContract.dtos.employees.EmployeeFilterDTO;
 import id.indocyber.EmployeeContract.dtos.employees.EmployeeFormDTO;
 import id.indocyber.EmployeeContract.dtos.position.PositionFieldDTO;
-import id.indocyber.EmployeeContract.dtos.position.PositionFormDTO;
 import id.indocyber.EmployeeContract.models.Branch;
 import id.indocyber.EmployeeContract.models.Employee;
 import id.indocyber.EmployeeContract.models.Position;
-import id.indocyber.EmployeeContract.repositories.BranchRepository;
 import id.indocyber.EmployeeContract.repositories.EmployeeRepository;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -126,25 +125,50 @@ public class EmployeeService {
                 if(row.getRowNum() == 0){
                     continue;
                 }
+                try {
+                    var branch = Branch.builder()
+                            .name(row.getCell(2).getStringCellValue())
+                            .build();
+                    var position = Position.builder()
+                            .name(row.getCell(3).getStringCellValue())
+                            .build();
 
-                var branch = Branch.builder()
-                        .code(row.getCell(2).getStringCellValue())
-                        .build();
-                var position = Position.builder()
-                        .code(row.getCell(3).getStringCellValue())
-                        .build();
+                    var foundBranch = branchService.getByName(branch.getName());
+                    if (foundBranch.isPresent()) {
+                        branch.setCode(foundBranch.get().getCode());
+                    } else {
+                        System.err.println("Branch " + branch.getName() + " not found!");
+                        continue;
+                    }
 
-                Employee employee = Employee.builder()
-                        .code(row.getCell(0).getStringCellValue())
-                        .name(row.getCell(1).getStringCellValue())
-                        .branch(branch)
-                        .position(position)
-                        .contractStartDate(row.getCell(4).getLocalDateTimeCellValue().toLocalDate())
-                        .contractEndDate(row.getCell(5).getLocalDateTimeCellValue().toLocalDate())
-                        .build();
+                    var foundPosition = positionService.getByName(position.getName());
+                    if (foundPosition.isPresent()) {
+                        position.setCode(foundPosition.get().getCode());
+                    } else {
+                        System.err.println("Position " + position.getName() + " not found!");
+                        continue;
+                    }
 
-                employees.add(employee);
-                System.out.println("Data : " + employee);
+                    if (row.getCell(0).getStringCellValue().isEmpty()) {
+                        System.err.println("Employee Code not found");
+                        continue;
+                    }
+
+                    Employee employee = Employee.builder()
+                            .code(row.getCell(0).getStringCellValue())
+                            .name(row.getCell(1).getStringCellValue())
+                            .branch(branch)
+                            .position(position)
+                            .contractStartDate(row.getCell(4).getLocalDateTimeCellValue().toLocalDate())
+                            .contractEndDate(row.getCell(5).getLocalDateTimeCellValue().toLocalDate())
+                            .build();
+
+                    employees.add(employee);
+                    System.out.println("Data : " + employee);
+                } catch (Exception e){
+                    System.err.println("Error : " + e.getMessage());
+                    continue;
+                }
             }
 
             employeeRepository.saveAll(employees);
@@ -154,5 +178,70 @@ public class EmployeeService {
             System.err.println("Error : " + e.getMessage());
             return false;
         }
+    }
+
+    public byte[] createExcelTemplate() throws IOException {
+        List<BranchFieldDTO> branches = branchService.get();
+        List<PositionFieldDTO> positions = positionService.get();
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Employees");
+
+        Row headerRow = sheet.createRow(0);
+        String[] headers = {
+                "Employee Code",
+                "Employee Name",
+                "Branch",
+                "Position",
+                "Contract Start Date",
+                "Contract End Date"
+        };
+
+        for(int i=0; i<headers.length; i++){
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        createDropdownList(sheet, branches.stream().map(
+                BranchFieldDTO::getName
+        ).toArray(String[]::new), 1, 40, 2);
+
+        createDropdownList(sheet, positions.stream().map(
+                PositionFieldDTO::getName
+        ).toArray(String[]::new), 1, 40, 3);
+
+        CellStyle formatTanggal = createDateCellStyle(workbook);
+
+        for(int i=1; i < 40; i++){
+            Row row = sheet.createRow(i);
+            Cell startDateCell = row.createCell(4);
+            startDateCell.setCellStyle(formatTanggal);
+            Cell endDateCell = row.createCell(5);
+            endDateCell.setCellStyle(formatTanggal);
+        }
+
+        sheet.autoSizeColumn(0);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        workbook.write(out);
+        workbook.close();
+        return out.toByteArray();
+    }
+
+    private void createDropdownList(Sheet sheet, String[] options, int firstRow, int lastRow, int column){
+        DataValidationHelper validationHelper = sheet.getDataValidationHelper();
+        DataValidationConstraint constraint = validationHelper.createExplicitListConstraint(options);
+
+        CellRangeAddressList addressList = new CellRangeAddressList(firstRow, lastRow, column, column);
+        DataValidation validation = validationHelper.createValidation(constraint, addressList);
+        validation.setShowErrorBox(true);
+        sheet.addValidationData(validation);
+    }
+
+    private CellStyle createDateCellStyle(Workbook workbook) {
+        CreationHelper createHelper = workbook.getCreationHelper();
+        CellStyle dateCellStyle = workbook.createCellStyle();
+        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-mm-dd"));
+        return dateCellStyle;
     }
 }
